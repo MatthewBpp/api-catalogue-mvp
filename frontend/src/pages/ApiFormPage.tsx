@@ -37,6 +37,7 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
     openapi_path: ''
   });
 
+  const [tagsInput, setTagsInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(mode === 'edit');
@@ -77,6 +78,8 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
             team: api.team || '',
             openapi_path: api.openapi_path || ''
           });
+
+          setTagsInput((api.tags || []).join(', '));
         } catch (err: any) {
           setError(err.message || 'Failed to load API');
         } finally {
@@ -90,17 +93,7 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
 
   // Handle input changes
   const handleChange = (field: keyof ApiRecord, value: string) => {
-    if (field === 'tags') {
-      setForm(prev => ({
-        ...prev,
-        tags: value
-          .split(',')
-          .map(t => t.trim())
-          .filter(Boolean),
-      }));
-    } else {
-      setForm(prev => ({ ...prev, [field]: value }));
-    }
+    setForm(prev => ({ ...prev, [field]: value }));
   };
 
   // Handle form submit
@@ -154,49 +147,61 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
         {/* Name */}
         <div style={{ marginBottom: 12 }}>
           <label>
-            Name
+            Name <span style={{ color: 'red' }}>*</span>
             <input
               type="text"
+              placeholder="e.g. Payments Service"
               value={form.name}
               onChange={e => handleChange('name', e.target.value)}
               style={{ display: 'block', width: '100%', marginTop: 4 }}
               required
             />
           </label>
+          <small style={{ color: '#555' }}>
+            A short, human‑friendly name for the API.
+          </small>
         </div>
 
         {/* Base URL */}
         <div style={{ marginBottom: 12 }}>
           <label>
-            Base URL
+            Base URL <span style={{ color: 'red' }}>*</span>
             <input
               type="text"
+              placeholder="https://api.example.com/payments"
               value={form.base_url}
               onChange={e => handleChange('base_url', e.target.value)}
               style={{ display: 'block', width: '100%', marginTop: 4 }}
               required
             />
           </label>
+          <small style={{ color: '#555' }}>
+            The root URL where the API is hosted.
+          </small>
         </div>
 
         {/* Version */}
         <div style={{ marginBottom: 12 }}>
           <label>
-            Version
+            Version <span style={{ color: 'red' }}>*</span>
             <input
               type="text"
+              placeholder="v1, v2.1, etc."
               value={form.version}
               onChange={e => handleChange('version', e.target.value)}
               style={{ display: 'block', width: '100%', marginTop: 4 }}
               required
             />
           </label>
+          <small style={{ color: '#555' }}>
+            Semantic or internal version identifier.
+          </small>
         </div>
 
         {/* Lifecycle */}
         <div style={{ marginBottom: 12 }}>
           <label>
-            Lifecycle
+            Lifecycle <span style={{ color: 'red' }}>*</span>
             <select
               value={form.lifecycle}
               onChange={e => handleChange('lifecycle', e.target.value)}
@@ -210,6 +215,9 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
               ))}
             </select>
           </label>
+          <small style={{ color: '#555' }}>
+            Indicates whether the API is in design, development, production, or deprecated.
+          </small>
         </div>
 
         {/* Description */}
@@ -217,24 +225,42 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
           <label>
             Description
             <textarea
+              placeholder="What does this API do?"
               value={form.description}
               onChange={e => handleChange('description', e.target.value)}
               style={{ display: 'block', width: '100%', marginTop: 4 }}
             />
           </label>
+          <small style={{ color: '#555' }}>
+            A short explanation of the API’s purpose.
+          </small>
         </div>
 
         {/* Tags */}
         <div style={{ marginBottom: 12 }}>
           <label>
-            Tags (comma-separated)
+            Tags (comma‑separated)
             <input
               type="text"
-              value={(form.tags || []).join(', ')}
-              onChange={e => handleChange('tags', e.target.value)}
+              placeholder="payments, finance, transactions"
+              value={tagsInput}
+              onChange={e => {
+                const value = e.target.value;
+                setTagsInput(value);
+                setForm(prev => ({
+                  ...prev,
+                  tags: value
+                    .split(',')
+                    .map(t => t.trim())
+                    .filter(Boolean)
+                }));
+              }}
               style={{ display: 'block', width: '100%', marginTop: 4 }}
             />
           </label>
+          <small style={{ color: '#555' }}>
+            Add multiple tags separated by commas.
+          </small>
         </div>
 
         {/* Team */}
@@ -243,11 +269,15 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
             Team
             <input
               type="text"
+              placeholder="e.g. Platform Engineering"
               value={form.team}
               onChange={e => handleChange('team', e.target.value)}
               style={{ display: 'block', width: '100%', marginTop: 4 }}
             />
           </label>
+          <small style={{ color: '#555' }}>
+            The team responsible for maintaining this API.
+          </small>
         </div>
 
         {/* OpenAPI Path */}
@@ -256,11 +286,15 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
             OpenAPI Path
             <input
               type="text"
+              placeholder="/openapi/payments.yaml"
               value={form.openapi_path}
               onChange={e => handleChange('openapi_path', e.target.value)}
               style={{ display: 'block', width: '100%', marginTop: 4 }}
             />
           </label>
+          <small style={{ color: '#555' }}>
+            Relative path to the OpenAPI specification file.
+          </small>
         </div>
 
         <button type="submit" disabled={saving}>
