@@ -1,10 +1,10 @@
-import express from 'express';
+import express, { type Application } from 'express';
 import cors from 'cors';
 import { supabase } from './supabaseClient';
 import { authMiddleware, requireCatalogueGroup } from './authMiddleware';
 import { listApis } from './apiService';
 
-const app = express();
+const app: Application = express();
 app.use(cors());
 app.use(express.json());
 app.use(authMiddleware);
