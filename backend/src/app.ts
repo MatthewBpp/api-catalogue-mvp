@@ -27,12 +27,18 @@ app.get('/apis', async (req, res) => {
 // Create (requires catalogue group)
 app.post('/apis', requireCatalogueGroup, async (req, res) => {
   try {
-    const userId = req.user!.id; // safe because authMiddleware guarantees req.user
+    const userId = req.user!.id;
     const body = req.body;
+
+    const payload = {
+      ...body,
+      owner_id: userId,
+      tags: Array.isArray(body.tags) ? body.tags : []
+    };
 
     const { data, error } = await supabase
       .from('apis')
-      .insert([{ ...body, owner_id: userId }])
+      .insert([payload])
       .select()
       .single();
 
@@ -67,9 +73,16 @@ app.put('/apis/:id', requireCatalogueGroup, async (req, res) => {
     }
 
     // 3. Perform update
+    const body = req.body;
+
+    const payload = {
+      ...body,
+      tags: Array.isArray(body.tags) ? body.tags : []
+    };
+
     const { data, error } = await supabase
       .from('apis')
-      .update(req.body)
+      .update(payload)
       .eq('id', apiId)
       .select()
       .single();
@@ -119,7 +132,3 @@ app.delete('/apis/:id', requireCatalogueGroup, async (req, res) => {
 });
 
 export default app;
-
-
-//  This code sets up an Express server with routes to manage API records, including listing, creating, updating, and deleting APIs. It uses Supabase for database interactions and includes authentication and authorization checks to ensure that only authorized users can modify API records.
-
