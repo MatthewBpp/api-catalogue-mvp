@@ -119,3 +119,7 @@ app.delete('/apis/:id', requireCatalogueGroup, async (req, res) => {
 });
 
 export default app;
+
+
+//  This code sets up an Express server with routes to manage API records, including listing, creating, updating, and deleting APIs. It uses Supabase for database interactions and includes authentication and authorization checks to ensure that only authorized users can modify API records.
+
