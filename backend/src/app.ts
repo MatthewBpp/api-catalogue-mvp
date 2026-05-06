@@ -57,6 +57,26 @@ app.get('/debug/user-lookup', async (req, res) => {
 });
 
 /**
+ * Validate a user number before login.
+ */
+app.get('/auth/validate', async (req, res) => {
+  const rawUserNumber = req.headers['x-user-number'];
+  const userNumber = Array.isArray(rawUserNumber) ? rawUserNumber[0] : rawUserNumber;
+
+  if (!userNumber || typeof userNumber !== 'string' || !userNumber.trim()) {
+    return res.status(400).json({ error: 'Missing x-user-number header' });
+  }
+
+  const user = await getUserByNumber(userNumber.trim());
+
+  if (!user) {
+    return res.status(401).json({ error: 'User not recognised' });
+  }
+
+  return res.json({ user });
+});
+
+/**
  * FIX 3 — Auth middleware must come AFTER CORS preflight
  */
 app.use(authMiddleware);
@@ -74,6 +94,30 @@ app.get('/apis', async (req, res) => {
     console.error('Error listing APIs:', err);
     res.status(500).json({
       error: 'Failed to fetch APIs',
+      details: process.env.NODE_ENV === 'production' ? undefined : err.message || err
+    });
+  }
+});
+
+// Get single API by ID
+app.get('/apis/:id', async (req, res) => {
+  try {
+    const apiId = req.params.id;
+    const { data, error } = await supabase
+      .from('apis')
+      .select('*')
+      .eq('id', apiId)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ error: 'API not found' });
+    }
+
+    res.json(data);
+  } catch (err: any) {
+    console.error('Error fetching API by ID:', err);
+    res.status(500).json({
+      error: 'Failed to fetch API',
       details: process.env.NODE_ENV === 'production' ? undefined : err.message || err
     });
   }

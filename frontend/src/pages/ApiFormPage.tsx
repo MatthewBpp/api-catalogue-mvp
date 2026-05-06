@@ -57,10 +57,7 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
         try {
           setLoading(true);
 
-          const data = await apiFetch(`/apis?q=${id}`);
-          const api = Array.isArray(data)
-            ? data.find((a: any) => a.id === id)
-            : data;
+          const api = await apiFetch(`/apis/${id}`);
 
           if (!api) {
             setError('API not found');
@@ -128,7 +125,13 @@ const ApiFormPage: React.FC<ApiFormPageProps> = ({ mode }) => {
 
       navigate('/apis');
     } catch (err: any) {
-      setError(err.message || 'Failed to save API');
+      if (err?.status === 403) {
+        setError('You do not have permission to save this API.');
+      } else if (err?.message) {
+        setError(err.message);
+      } else {
+        setError('Failed to save API');
+      }
     } finally {
       setSaving(false);
     }

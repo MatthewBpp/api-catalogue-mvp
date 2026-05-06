@@ -30,6 +30,23 @@ const ApiListPage: React.FC = () => {
   const [tagFilter, setTagFilter] = useState('');
   const [lifecycleFilter, setLifecycleFilter] = useState('');
 
+  const deleteApi = async (apiId: string) => {
+    if (!window.confirm('Delete this API? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/apis/${apiId}`, { method: 'DELETE' });
+      setApis(current => current.filter(api => api.id !== apiId));
+    } catch (err: any) {
+      setError(
+        err?.status === 403
+          ? 'You do not have permission to delete this API.'
+          : err?.message || 'Failed to delete API'
+      );
+    }
+  };
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -167,8 +184,25 @@ const ApiListPage: React.FC = () => {
               </div>
             )}
 
-            <div style={{ marginTop: 12 }}>
-              <Link to={`/apis/${api.id}/edit`}>Edit</Link>
+            <div style={{ marginTop: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
+              <Link to={`/apis/${api.id}/edit`} style={{ color: '#007acc', textDecoration: 'underline' }}>
+                Edit
+              </Link>
+              <button
+                type="button"
+                onClick={() => deleteApi(api.id)}
+                style={{
+                  background: 'transparent',
+                  color: '#007acc',
+                  border: 'none',
+                  padding: 0,
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  font: 'inherit'
+                }}
+              >
+                Delete
+              </button>
             </div>
           </li>
         ))}

@@ -36,7 +36,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
   if (!userRow) {
     console.warn('Unknown user number:', normalizedUserNumber);
     return res.status(401).json({
-      error: "Unknown user",
+      error: "User not recognised",
       userNumber: normalizedUserNumber
     });
   }
@@ -52,7 +52,9 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
 export const requireCatalogueGroup = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user?.groups?.includes('api_catalogue_group')) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json({
+      error: 'You do not have the required permissions to create or modify APIs.'
+    });
   }
   next();
 };
