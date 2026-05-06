@@ -15,7 +15,8 @@ app.use(cors({
     /^https:\/\/.*-4000\.app\.github\.dev$/   // backend
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'x-user-number']
+  allowedHeaders: ['Content-Type', 'x-user-number', 'x-Custom-Preflight']
+
 }));
 
 /**
