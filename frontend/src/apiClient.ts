@@ -12,6 +12,9 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
   headers.set('x-user-number', userNumber);
   headers.set('Content-Type', 'application/json');
 
+  // Force Safari to send a preflight so Codespaces won't strip headers
+  headers.set('X-Custom-Preflight', 'true');
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
@@ -23,3 +26,6 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
 
   return res.json().catch(() => null);
 }
+
+
+
