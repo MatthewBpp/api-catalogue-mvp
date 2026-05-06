@@ -3,6 +3,7 @@ import cors from 'cors';
 import { supabase } from './supabaseClient';
 import { authMiddleware, requireCatalogueGroup } from './authMiddleware';
 import { listApis } from './apiService';
+import { getUserByNumber } from './userService';
 
 const app: Application = express();
 
@@ -15,8 +16,13 @@ app.use(cors({
     /^https:\/\/.*-4000\.app\.github\.dev$/   // backend
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'x-user-number', 'x-Custom-Preflight']
-
+  allowedHeaders: [
+    'Content-Type',
+    'x-user-number',
+    'x-custom-preflight',
+    'x-Custom-Preflight'
+  ],
+  optionsSuccessStatus: 204
 }));
 
 /**
@@ -26,6 +32,29 @@ app.use(cors({
 app.options(/.*/, cors());
 
 app.use(express.json());
+
+/**
+ * Public root route for health checks and port preview.
+ */
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'API Catalogue backend is running' });
+});
+
+/**
+ * Temporary debug route for development to verify user lookup by header.
+ * REMOVE BEFORE PRODUCTION.
+ */
+app.get('/debug/user-lookup', async (req, res) => {
+  const rawUserNumber = req.headers['x-user-number'];
+  const userNumber = Array.isArray(rawUserNumber) ? rawUserNumber[0] : rawUserNumber;
+
+  if (!userNumber || typeof userNumber !== 'string' || !userNumber.trim()) {
+    return res.status(400).json({ error: 'Missing x-user-number header' });
+  }
+
+  const user = await getUserByNumber(userNumber.trim());
+  return res.json({ userNumber: userNumber.trim(), user });
+});
 
 /**
  * FIX 3 — Auth middleware must come AFTER CORS preflight
@@ -42,8 +71,11 @@ app.get('/apis', async (req, res) => {
     );
     res.json(apis);
   } catch (err: any) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch APIs' });
+    console.error('Error listing APIs:', err);
+    res.status(500).json({
+      error: 'Failed to fetch APIs',
+      details: process.env.NODE_ENV === 'production' ? undefined : err.message || err
+    });
   }
 });
 

@@ -1,7 +1,18 @@
 // Load environment variables early to ensure configuration is available before any module initialises.
 // This supports clean separation between code and environment-specific settings.
+import path from 'path';
 import dotenv from 'dotenv';
-dotenv.config();
+
+const envPath = path.resolve(__dirname, '../.env');
+console.log('Loading .env from:', envPath);
+const result = dotenv.config({ path: envPath });
+
+if (result.error) {
+  console.warn('Warning: Could not load .env file:', result.error.message);
+} else {
+  console.log('.env loaded successfully');
+}
+
 import app from './app';
 
 // Resolve the port from the environment with a safe fallback.
