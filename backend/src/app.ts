@@ -5,8 +5,30 @@ import { authMiddleware, requireCatalogueGroup } from './authMiddleware';
 import { listApis } from './apiService';
 
 const app: Application = express();
-app.use(cors());
+
+/**
+ * FIX 1 — Configure CORS to allow requests from the frontend
+ */
+app.use(cors({
+  origin: [
+    /^https:\/\/.*-5173\.app\.github\.dev$/,  // frontend
+    /^https:\/\/.*-4000\.app\.github\.dev$/   // backend
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'x-user-number']
+}));
+
+/**
+ * FIX 2 — Let CORS handle OPTIONS preflight
+ * (This must run BEFORE authMiddleware)
+ */
+app.options(/.*/, cors());
+
 app.use(express.json());
+
+/**
+ * FIX 3 — Auth middleware must come AFTER CORS preflight
+ */
 app.use(authMiddleware);
 
 // List & search
@@ -56,7 +78,6 @@ app.put('/apis/:id', requireCatalogueGroup, async (req, res) => {
     const apiId = req.params.id;
     const userId = req.user!.id;
 
-    // 1. Fetch the API to check ownership
     const { data: api, error: fetchError } = await supabase
       .from('apis')
       .select('owner_id')
@@ -67,12 +88,10 @@ app.put('/apis/:id', requireCatalogueGroup, async (req, res) => {
       return res.status(404).json({ error: 'API not found' });
     }
 
-    // 2. Ownership check
     if (api.owner_id !== userId) {
       return res.status(403).json({ error: 'Not authorised to update this API' });
     }
 
-    // 3. Perform update
     const body = req.body;
 
     const payload = {
@@ -101,7 +120,6 @@ app.delete('/apis/:id', requireCatalogueGroup, async (req, res) => {
     const apiId = req.params.id;
     const userId = req.user!.id;
 
-    // 1. Fetch the API to check ownership
     const { data: api, error: fetchError } = await supabase
       .from('apis')
       .select('owner_id')
@@ -112,12 +130,10 @@ app.delete('/apis/:id', requireCatalogueGroup, async (req, res) => {
       return res.status(404).json({ error: 'API not found' });
     }
 
-    // 2. Ownership check
     if (api.owner_id !== userId) {
       return res.status(403).json({ error: 'Not authorised to delete this API' });
     }
 
-    // 3. Perform delete
     const { error } = await supabase
       .from('apis')
       .delete()

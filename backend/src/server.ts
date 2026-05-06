@@ -1,8 +1,8 @@
 // Load environment variables early to ensure configuration is available before any module initialises.
 // This supports clean separation between code and environment-specific settings.
-import app from './app';
 import dotenv from 'dotenv';
 dotenv.config();
+import app from './app';
 
 // Resolve the port from the environment with a safe fallback.
 // Using Number() ensures consistent typing when the value is injected by hosting platforms.

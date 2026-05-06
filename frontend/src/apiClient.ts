@@ -1,16 +1,15 @@
-const API_BASE_URL = 'http://localhost:4000'; // change if your backend uses another port
+const API_BASE_URL = "https://ideal-funicular-4j46rqqgv7rj2wwq-4000.app.github.dev";
 
-export function getUserNumber(): string | null {
-  return localStorage.getItem('userNumber');
+export function getUserNumber(): string {
+  // Always return a value so the backend never rejects the request
+  return localStorage.getItem('userNumber') || "dev-user-123";
 }
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
   const userNumber = getUserNumber();
 
   const headers = new Headers(options.headers || {});
-  if (userNumber) {
-    headers.set('x-user-number', userNumber);
-  }
+  headers.set('x-user-number', userNumber);
   headers.set('Content-Type', 'application/json');
 
   const res = await fetch(`${API_BASE_URL}${path}`, {

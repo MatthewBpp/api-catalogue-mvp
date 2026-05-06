@@ -9,7 +9,16 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "cors", "jest"]
+
+    "types": ["node", "jest"],
+
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types"
+    ]
   },
+
+  "files": ["src/types/express.d.ts"],
+
   "include": ["src", "tests"]
 }

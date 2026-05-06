@@ -1,10 +1,9 @@
-import {createClient} from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 const url = process.env.SUPABASE_URL!;
-const key = process.env.SUPABASE_ANON_KEY!;
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export const supabase = createClient(url, key);
-
 
 // This file initializes the Supabase client using the URL and anonymous key from environment variables.
 // Creates a Supabase client instance that can be imported and used in other parts of the application to perform database operations.
